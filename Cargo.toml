@@ -1,0 +1,11 @@
+[package]
+name = "rpi_planner"
+version = "0.1.0"
+authors = ["Benjamin Sherman <benjamin@bensherman.io>"]
+edition = "2018"
+license = "MPL-2.0"
+
+[dependencies]
+structopt = "0.2.16"
+serde = { version = "1.0.92", features = ["derive"] }
+serde_json = "1.0.39"
