@@ -26,7 +26,7 @@ def parse_course(course_strings):
 	course['coid']['subj'] = coid_and_name[0][:4]
 	course['coid']['code'] = int(coid_and_name[0][5:-1])
 	course['name'] = coid_and_name[1]
-	course['descriptions'] = course_strings[1]
+	course['description'] = course_strings[1]
 
 	course['offered'] = ""
 	course['prereqs'] = []
