@@ -1,5 +1,5 @@
 [package]
-name = "rpi_planner"
+name = "myca"
 version = "0.1.0"
 authors = ["Benjamin Sherman <benjamin@bensherman.io>"]
 edition = "2018"
