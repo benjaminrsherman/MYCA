@@ -43,7 +43,7 @@ def parse_course(course_strings):
 				prereq_str_split = prereq_str.split(" ")
 				prereq = {}
 				prereq['subj'] = prereq_str_split[0]
-				prereq['code'] = prereq_str_split[1]
+				prereq['code'] = int(prereq_str_split[1])
 				course['prereqs'].append(prereq)
 			if len(reqs) > 1:
 				coreqs = coid_re.findall(reqs[1])
@@ -51,7 +51,7 @@ def parse_course(course_strings):
 					coreq_str_split = coreq_str.split(" ")
 					coreq = {}
 					coreq['subj'] = coreq_str_split[0]
-					coreq['code'] = coreq_str_split[1]
+					coreq['code'] = int(coreq_str_split[1])
 					course['coreqs'].append(coreq)
 		elif "When Offered:" == course_strings[i]:
 			i += 1
@@ -69,6 +69,8 @@ def parse_course(course_strings):
 				course['offered'] += "o"
 				
 		i += 1		
+	
+	course['post_options'] = []
 
 	return course
 
