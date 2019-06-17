@@ -17,7 +17,7 @@ while True:
 	coids.extend(current_coids)
 	i += 1
 
-coid_re = re.compile("[A-Z]{4} \d{4}")
+coid_re = re.compile("[A-Z]{4} +\d{4}")
 def parse_course(course_strings):
 	course = {}
 
