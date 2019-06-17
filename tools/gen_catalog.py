@@ -32,6 +32,7 @@ def parse_course(course_strings):
 	course['prereqs'] = []
 	course['prereqs_opt'] = []
 	course['coreqs'] = []
+	course['coreqs_opt'] = []
 
 	i = 2
 	while i < len(course_strings):
