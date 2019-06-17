@@ -21,6 +21,8 @@ coid_re = re.compile("[A-Z]{4} +\d{4}")
 def parse_course(course_strings):
 	course = {}
 
+	course['complete'] = True # assume we parse correctly
+
 	coid_and_name = course_strings[0].split("-")
 	course['coid'] = {}
 	course['coid']['subj'] = coid_and_name[0][:4]
