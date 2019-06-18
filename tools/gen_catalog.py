@@ -38,8 +38,26 @@ def parse_course(course_strings):
 	course['coreqs_opt'] = []
 
 	i = 2
+	in_prereqs = False
 	while i < len(course_strings):
-		if "Prerequisites/Corequisites:" == course_strings[i]:
+		if "When Offered:" == course_strings[i]:
+			i += 1
+			if i >= len(course_strings):
+				break
+			offered_lower = course_strings[i].lower()
+			if "spring" in offered_lower:
+				course['offered'] += "s"
+			if "summer" in offered_lower:
+				course['offered'] += "u"
+			if "fall" in offered_lower:
+				course['offered'] += "f"
+
+			if "even" in offered_lower:
+				course['offered'] += "e"
+			if "odd" in offered_lower:
+				course['offered'] += "o"
+			in_prereqs = False
+		elif in_prereqs or "Prerequisites/Corequisites:" == course_strings[i]:
 			i += 1
 			reqs = course_strings[i].split("orequisite") # no 'C' in case someone decides to make it lowercase
 			prereqs = coid_re.findall(reqs[0])
@@ -57,22 +75,10 @@ def parse_course(course_strings):
 					coreq['subj'] = coreq_str_split[0]
 					coreq['code'] = int(coreq_str_split[1])
 					course['coreqs'].append(coreq)
-		elif "When Offered:" == course_strings[i]:
-			i += 1
-			offered_lower = course_strings[i].lower()
-			if "spring" in offered_lower:
-				course['offered'] += "s"
-			if "summer" in offered_lower:
-				course['offered'] += "u"
-			if "fall" in offered_lower:
-				course['offered'] += "f"
-
-			if "even" in offered_lower:
-				course['offered'] += "e"
-			if "odd" in offered_lower:
-				course['offered'] += "o"
+			in_prereqs = True
 				
-		i += 1		
+		if not in_prereqs:
+			i += 1		
 	
 	course['post_options'] = []
 
