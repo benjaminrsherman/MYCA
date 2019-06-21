@@ -36,6 +36,7 @@ def parse_course(course_strings):
 	course['prereqs_one'] = []
 	course['coreqs'] = []
 	course['coreqs_opt'] = []
+	course['coreqs_one'] = []
 
 	i = 2
 	in_prereqs = False
