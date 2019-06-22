@@ -50,20 +50,38 @@ impl fmt::Display for CourseID {
 
 #[derive(Deserialize)]
 pub struct Course {
+    complete: bool,
+
     name: String,
     description: String,
+
     coid: CourseID,
-    prereqs: Vec<CourseID>,
+
+    offered: String,
+    age_reqs: String,
+
+    prereqs: Vec<HashSet<CourseID>>,
+    prereqs_opt: HashSet<CourseID>,
+
+    coreqs: Vec<HashSet<CourseID>>,
+    coreqs_opt: HashSet<CourseID>,
+
     post_options: HashSet<CourseID>,
 }
 
 impl Course {
     pub fn new(coid: &CourseID) -> Self {
         Course {
+            complete: true,
             name: String::new(),
             description: String::new(),
             coid: coid.clone(),
+            offered: String::new(),
+            age_reqs: String::new(),
             prereqs: Vec::new(),
+            prereqs_opt: HashSet::new(),
+            coreqs: Vec::new(),
+            coreqs_opt: HashSet::new(),
             post_options: HashSet::new(),
         }
     }
@@ -73,7 +91,9 @@ impl Course {
     }
 
     pub fn add_prereq(&mut self, coid: &CourseID) {
-        self.prereqs.push(coid.clone());
+        let mut hashset = HashSet::new();
+        hashset.insert(coid.clone());
+        self.prereqs.push(hashset);
     }
 
     fn add_postoption(&mut self, coid: &CourseID) {
@@ -102,13 +122,15 @@ impl Catalog {
             self.courses.remove(&course.get_id());
         }
 
-        for coid in &course.prereqs {
-            if let Some(found_course) = self.get_course_mut(&coid) {
-                found_course.add_postoption(&coid);
-            } else {
-                let mut new_course = Course::new(&coid);
-                new_course.add_postoption(&coid);
-                self.courses.insert(coid.clone(), new_course);
+        for coid_set in &course.prereqs {
+            for coid in coid_set {
+                if let Some(found_course) = self.get_course_mut(&coid) {
+                    found_course.add_postoption(&coid);
+                } else {
+                    let mut new_course = Course::new(&coid);
+                    new_course.add_postoption(&coid);
+                    self.courses.insert(coid.clone(), new_course);
+                }
             }
         }
 
@@ -127,6 +149,8 @@ impl Catalog {
         self.courses.get_mut(coid)
     }
 
+    // TODO: This should return a legitimate tree, not a vector of all
+    // possible prerequisite courses
     pub fn get_course_tree(&self, coid: &CourseID) -> Option<Vec<&Course>> {
         let course = match self.get_course(coid) {
             Some(c) => c,
@@ -135,9 +159,11 @@ impl Catalog {
 
         let mut course_tree = Vec::new();
 
-        for coid in &course.prereqs {
-            let mut prereq_tree = self.get_course_tree(coid).unwrap_or_else(|| panic!("Error: Malformed catalog!"));
-            course_tree.append(&mut prereq_tree);
+        for coid_set in &course.prereqs {
+            for coid in coid_set {
+                let mut prereq_tree = self.get_course_tree(coid).unwrap_or_else(|| panic!("Error: Malformed catalog!"));
+                course_tree.append(&mut prereq_tree);
+            }
         }
 
         course_tree.push(course);

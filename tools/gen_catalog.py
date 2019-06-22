@@ -17,29 +17,41 @@ while True:
 	coids.extend(current_coids)
 	i += 1
 
-coid_re = re.compile("[A-Z]{4} +\d{4}")
+coid_re = re.compile("[A-Z]{4}\s+\d{4}")
 def parse_course(course_strings):
+	if len(course_strings) == 0:
+		return None
+		
 	course = {}
 
 	course['complete'] = True # assume we parse correctly
 
-	coid_and_name = course_strings[0].split("-")
+	coid_and_name = course_strings[0].split(" - ")
+	if len(coid_and_name[0]) > 9:
+		return None
+
 	course['coid'] = {}
 	course['coid']['subj'] = coid_and_name[0][:4]
-	course['coid']['code'] = int(coid_and_name[0][5:-1])
+	course['coid']['code'] = int(coid_and_name[0][-4:])
 	course['name'] = coid_and_name[1]
-	course['description'] = course_strings[1]
+	course['description'] = ""
 
 	course['offered'] = ""
+	course['age_reqs'] = ""
 	course['prereqs'] = []
 	course['prereqs_opt'] = []
-	course['prereqs_one'] = []
 	course['coreqs'] = []
 	course['coreqs_opt'] = []
-	course['coreqs_one'] = []
+	
+	course['post_options'] = []
+
+	if len(course_strings) == 1:
+		return course
+	course['description'] = course_strings[1]
 
 	i = 2
 	in_prereqs = False
+	reqs_str = ""
 	while i < len(course_strings):
 		if "When Offered:" == course_strings[i]:
 			i += 1
@@ -60,28 +72,54 @@ def parse_course(course_strings):
 			in_prereqs = False
 		elif in_prereqs or "Prerequisites/Corequisites:" == course_strings[i]:
 			i += 1
-			reqs = course_strings[i].split("orequisite") # no 'C' in case someone decides to make it lowercase
-			prereqs = coid_re.findall(reqs[0])
-			for prereq_str in prereqs:
-				prereq_str_split = prereq_str.split(" ")
-				prereq = {}
-				prereq['subj'] = prereq_str_split[0]
-				prereq['code'] = int(prereq_str_split[1])
-				course['prereqs'].append(prereq)
-			if len(reqs) > 1:
-				coreqs = coid_re.findall(reqs[1])
-				for coreq_str in coreqs:
-					coreq_str_split = coreq_str.split(" ")
-					coreq = {}
-					coreq['subj'] = coreq_str_split[0]
-					coreq['code'] = int(coreq_str_split[1])
-					course['coreqs'].append(coreq)
+			if i == len(course_strings):
+				break				
+			reqs_str += course_strings[i]
 			in_prereqs = True
 				
 		if not in_prereqs:
 			i += 1		
 	
-	course['post_options'] = []
+	if "freshman" in reqs_str.lower():
+		course['age_reqs'] += "f"
+	if "sophomore" in reqs_str.lower():
+		course['age_reqs'] += "o"
+	if "junior" in reqs_str.lower():
+		course['age_reqs'] += "j"
+	if "senior" in reqs_str.lower():
+		course['age_reqs'] += "s"
+	if "graduate" in reqs_str.lower():
+		course['age_reqs'] += "g"
+	
+	reqs = reqs_str.split("orequisite") # no 'C' in case someone decides to make it lowercase
+	for match in reqs[0].split(" and "):
+		req_set = []
+		match_courses = coid_re.findall(match)
+		for req_str in match_courses:
+			req = {}
+			req['subj'] = req_str[:4]
+			req['code'] = int(req_str[-4:])
+			if " or " in match and " permission " not in match:
+				req_set.append(req)
+			else:
+				course['prereqs'].append([req])
+		if " or " in match and " permission " not in match:
+			course['prereqs'].append(req_set)
+
+	if len(reqs) > 1:
+		for match in reqs[1].split(" and "):
+			req_set = []
+			match_courses = coid_re.findall(match)
+			for req_str in match_courses:
+				req = {}
+				req['subj'] = req_str[:4]
+				req['code'] = int(req_str[-4:])
+				if " or " in match and " permission " not in match:
+					req_set.append(req)
+				else:
+					course['coreqs'].append([req])
+			if " or " in match and " permission " not in match:
+				course['coreqs'].append(req_set)
 
 	return course
 
@@ -96,12 +134,11 @@ for coid in coids:
 	entry = BeautifulSoup(course_html, "html.parser").find("td", class_="block_content_popup")
 	title = entry.find("h1")
 	course_strings = [text for text in entry.stripped_strings][4:-5]
-	try:
-		course = parse_course(course_strings)
-		courses['courses'].append(course)
-		print("Parsed: " + course['coid']['subj'] + " " + str(course['coid']['code']))
-	except:
+	course = parse_course(course_strings)
+	if course is None:
 		continue
+	courses['courses'].append(course)
+	print("Parsed: " + course['coid']['subj'] + " " + str(course['coid']['code']))
 
 import json
 with open('catalog.json', 'w') as outfile:
