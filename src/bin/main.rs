@@ -1,15 +1,15 @@
 use std::path::PathBuf;
 use structopt::StructOpt;
 
+use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
-use std::error::Error;
 
 use serde::Deserialize;
 
 extern crate myca;
-use myca::catalog::Catalog;
 use myca::catalog::course::*;
+use myca::catalog::Catalog;
 use myca::schedule;
 
 #[derive(Deserialize)]
@@ -42,28 +42,28 @@ struct Opt {
 
     /// Courses to generate prerequisites for
     #[structopt(name = "COURSE")]
-    courses: Vec<String>
+    courses: Vec<String>,
 }
 
 fn main() {
     let opt = Opt::from_args();
     let catalog_fname = opt.catalog.to_str().unwrap();
-    let catalog = parse_catalog(catalog_fname)
-        .unwrap_or_else(|err| panic!("Error parsing catalog: {}", err));
+    let catalog =
+        parse_catalog(catalog_fname).unwrap_or_else(|err| panic!("Error parsing catalog: {}", err));
 
     for input_coid in opt.courses {
         let coid = match CourseID::from(&input_coid) {
             Some(id) => id,
             None => {
                 eprintln!("Error: '{}' is not in the Course ID format", input_coid);
-                continue
+                continue;
             }
         };
         let schedules = schedule::get_schedules(&coid, &catalog);
 
         println!("Found {} schedule(s) for {}:", schedules.len(), coid);
         for (i, schedule) in schedules.iter().enumerate() {
-            println!("Schedule {}:", i+1);
+            println!("Schedule {}:", i + 1);
             println!("{}", schedule);
         }
     }

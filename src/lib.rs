@@ -9,7 +9,9 @@ pub mod catalog {
 
     impl Catalog {
         pub fn new() -> Self {
-            Catalog { courses: HashMap::new() }
+            Catalog {
+                courses: HashMap::new(),
+            }
         }
 
         pub fn add_course(&mut self, mut course: Course) {
@@ -62,7 +64,7 @@ pub mod catalog {
             pub fn new(subj: &str, code: u16) -> Self {
                 CourseID {
                     subj: String::from(subj),
-                    code
+                    code,
                 }
             }
 
@@ -73,11 +75,11 @@ pub mod catalog {
                     return None;
                 }
 
-                let code_str: String = char_vec[char_vec.len()-4..].iter().collect();
+                let code_str: String = char_vec[char_vec.len() - 4..].iter().collect();
 
-                let code = match code_str.parse::<u16>(){
+                let code = match code_str.parse::<u16>() {
                     Ok(num) => num,
-                    _ => return None
+                    _ => return None,
                 };
 
                 for character in &char_vec[..4] {
@@ -101,23 +103,23 @@ pub mod catalog {
         #[derive(Deserialize)]
         #[allow(dead_code)] // TODO: use all of the fields
         pub struct Course {
-            pub (in super) complete: bool,
+            pub(super) complete: bool,
 
-            pub (in super) name: String,
-            pub (in super) description: String,
+            pub(super) name: String,
+            pub(super) description: String,
 
-            pub (in super) coid: CourseID,
+            pub(super) coid: CourseID,
 
-            pub (in super) offered: String,
-            pub (in super) age_reqs: String,
+            pub(super) offered: String,
+            pub(super) age_reqs: String,
 
-            pub (in super) prereqs: Vec<HashSet<CourseID>>,
-            pub (in super) prereqs_opt: HashSet<CourseID>,
+            pub(super) prereqs: Vec<HashSet<CourseID>>,
+            pub(super) prereqs_opt: HashSet<CourseID>,
 
-            pub (in super) coreqs: Vec<HashSet<CourseID>>,
-            pub (in super) coreqs_opt: HashSet<CourseID>,
+            pub(super) coreqs: Vec<HashSet<CourseID>>,
+            pub(super) coreqs_opt: HashSet<CourseID>,
 
-            pub (in super) post_options: HashSet<CourseID>,
+            pub(super) post_options: HashSet<CourseID>,
         }
 
         impl Course {
@@ -147,7 +149,7 @@ pub mod catalog {
                 self.prereqs.push(hashset);
             }
 
-            pub(in super) fn add_postoption(&mut self, coid: &CourseID) {
+            pub(super) fn add_postoption(&mut self, coid: &CourseID) {
                 self.post_options.insert(coid.clone());
             }
 
@@ -169,12 +171,12 @@ pub mod catalog {
 }
 
 pub mod schedule {
-    use std::collections::{HashSet, BTreeMap};
-    use std::fmt;
     use std::cmp::Ordering;
+    use std::collections::{BTreeMap, HashSet};
+    use std::fmt;
 
-    use super::catalog::Catalog;
     use super::catalog::course::CourseID;
+    use super::catalog::Catalog;
 
     #[derive(PartialEq, Eq, Hash, Clone, Debug)]
     pub enum SemTime {
@@ -221,7 +223,6 @@ pub mod schedule {
         time: SemTime,
     }
 
-    
     impl Semester {
         pub fn new(time: SemTime) -> Self {
             Self {
@@ -268,7 +269,9 @@ pub mod schedule {
 
     impl Schedule {
         pub fn new() -> Self {
-            Self { semesters: BTreeMap::new() }
+            Self {
+                semesters: BTreeMap::new(),
+            }
         }
 
         pub fn add_semester(&mut self, sem: Semester) {
@@ -280,8 +283,8 @@ pub mod schedule {
                 Some(sem) => {
                     sem.add_course(coid);
                     true
-                },
-                None => false
+                }
+                None => false,
             }
         }
 
@@ -359,7 +362,11 @@ pub mod schedule {
         }
     }
 
-    pub fn add_course_to_schedule(coid: &CourseID, sched: &Schedule, catalog: &Catalog) -> Vec<Schedule> {
+    pub fn add_course_to_schedule(
+        coid: &CourseID,
+        sched: &Schedule,
+        catalog: &Catalog,
+    ) -> Vec<Schedule> {
         let course = match catalog.get_course(coid) {
             Some(c) => c,
             None => return Vec::new(),
