@@ -7,8 +7,10 @@ use std::error::Error;
 
 use serde::Deserialize;
 
-mod course;
-use crate::course::*;
+extern crate myca;
+use myca::catalog::Catalog;
+use myca::catalog::course::*;
+use myca::schedule;
 
 #[derive(Deserialize)]
 struct Courses {
@@ -57,17 +59,12 @@ fn main() {
                 continue
             }
         };
-        let course_tree = match catalog.get_course_tree(&coid) {
-            Some(tree) => tree,
-            None => {
-                eprintln!("Unable to generate course tree for {}", coid);
-                continue
-            }
-        };
+        let schedules = schedule::get_schedules(&coid, &catalog);
 
-        println!("Course Tree for {}:", coid);
-        for course in &course_tree {
-            println!("\t{}", course);
+        println!("Found {} schedule(s) for {}:", schedules.len(), coid);
+        for (i, schedule) in schedules.iter().enumerate() {
+            println!("Schedule {}:", i+1);
+            println!("{}", schedule);
         }
     }
 }
