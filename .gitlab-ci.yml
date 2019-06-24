@@ -1,0 +1,21 @@
+image: "rust:latest"
+
+before_script:
+    - cargo install --force cargo-audit
+    - rustup component add rustfmt
+
+audit:
+    script:
+        - cargo audit
+
+style:
+    script:
+        - cargo fmt --all -- --check
+
+compilation:
+    script:
+        - cargo build
+
+tests:
+    script:
+        - cargo test
