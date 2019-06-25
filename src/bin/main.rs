@@ -8,9 +8,7 @@ use std::io::BufReader;
 use serde::Deserialize;
 
 extern crate myca;
-use myca::catalog::course::*;
-use myca::catalog::Catalog;
-use myca::schedule;
+use myca::*;
 
 #[derive(Deserialize)]
 struct Courses {
@@ -59,7 +57,7 @@ fn main() {
                 continue;
             }
         };
-        let schedules = schedule::get_schedules(&coid, &catalog);
+        let schedules = get_schedules(&coid, &catalog);
 
         println!("Found {} schedule(s) for {}:", schedules.len(), coid);
         for (i, schedule) in schedules.iter().enumerate() {

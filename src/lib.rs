@@ -1,4 +1,8 @@
-pub mod catalog {
+pub use catalog::course::*;
+pub use catalog::*;
+pub use schedule::*;
+
+mod catalog {
     use std::collections::HashMap;
 
     use course::*;
@@ -144,7 +148,7 @@ pub mod catalog {
         }
     }
 
-    pub mod course {
+    pub(crate) mod course {
         use std::collections::HashSet;
         use std::fmt;
 
@@ -429,7 +433,7 @@ pub mod catalog {
     }
 }
 
-pub mod schedule {
+mod schedule {
     use std::cmp::Ordering;
     use std::collections::{BTreeMap, HashSet};
     use std::fmt;
@@ -827,6 +831,49 @@ pub mod schedule {
             new_sem.add_course(sem, coid);
             Some(new_sem)
         }
+
+        /// Generates all possible schedules which can be created by adding the
+        /// given course into the schedule.
+        ///
+        /// Recursively adds prerequisites based on the catalog entry as well.
+        pub fn add_course_to_schedule(
+            coid: &CourseID,
+            sched: &Schedule,
+            catalog: &Catalog,
+        ) -> Vec<Schedule> {
+            let course = match catalog.get_course(coid) {
+                Some(c) => c,
+                None => return Vec::new(),
+            };
+
+            // Place prerequisites into schedule first
+            let mut working_vec = vec![sched.clone()];
+            for prereq_set in course.prereq_sets() {
+                // curr_set will hold the set of all schedules from one of these prerequisites
+                let mut curr_set = Vec::new();
+                for prereq in prereq_set {
+                    for schedule in &working_vec {
+                        let mut prereq_options =
+                            Self::add_course_to_schedule(prereq, &schedule, catalog);
+                        curr_set.append(&mut prereq_options);
+                    }
+                }
+                working_vec = curr_set;
+            }
+
+            // TODO: Handle corequisites
+
+            let mut valid_schedules = Vec::new();
+            for sched in working_vec {
+                for (time, _) in sched.semesters() {
+                    if let Some(new_sched) = sched.try_add(coid, time, catalog) {
+                        valid_schedules.push(new_sched);
+                    }
+                }
+            }
+
+            valid_schedules
+        }
     }
 
     /// Schedules are output by printing their semesters in chronological order.
@@ -840,48 +887,6 @@ pub mod schedule {
 
             write!(f, "{}", output)
         }
-    }
-
-    /// Generates all possible schedules which can be created by adding the
-    /// given course into the schedule.
-    ///
-    /// Recursively adds prerequisites based on the catalog entry as well.
-    pub fn add_course_to_schedule(
-        coid: &CourseID,
-        sched: &Schedule,
-        catalog: &Catalog,
-    ) -> Vec<Schedule> {
-        let course = match catalog.get_course(coid) {
-            Some(c) => c,
-            None => return Vec::new(),
-        };
-
-        // Place prerequisites into schedule first
-        let mut working_vec = vec![sched.clone()];
-        for prereq_set in course.prereq_sets() {
-            // curr_set will hold the set of all schedules from one of these prerequisites
-            let mut curr_set = Vec::new();
-            for prereq in prereq_set {
-                for schedule in &working_vec {
-                    let mut prereq_options = add_course_to_schedule(prereq, &schedule, catalog);
-                    curr_set.append(&mut prereq_options);
-                }
-            }
-            working_vec = curr_set;
-        }
-
-        // TODO: Handle corequisites
-
-        let mut valid_schedules = Vec::new();
-        for sched in working_vec {
-            for (time, _) in sched.semesters() {
-                if let Some(new_sched) = sched.try_add(coid, time, catalog) {
-                    valid_schedules.push(new_sched);
-                }
-            }
-        }
-
-        valid_schedules
     }
 
     // TESTING FUNCTION
@@ -899,6 +904,6 @@ pub mod schedule {
         base_sched.add_semester(Semester::new(SemTime::Fall(3)));
         base_sched.add_semester(Semester::new(SemTime::Spring(4)));
 
-        add_course_to_schedule(coid, &base_sched, catalog)
+        Schedule::add_course_to_schedule(coid, &base_sched, catalog)
     }
 }
