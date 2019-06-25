@@ -154,8 +154,7 @@ mod catalog {
 
         use serde::Deserialize;
 
-        /// This structure is used to identify courses in the schedule and
-        /// catalog.
+        /// Used to identify courses in the schedule and catalog.
         #[derive(Deserialize, PartialEq, Eq, Hash, Clone, Debug)]
         pub struct CourseID {
             subj: String,
@@ -229,8 +228,9 @@ mod catalog {
             }
         }
 
-        /// This structure stores all information related to a course.  This
-        /// should only be generated when parsed from a json file.
+        /// Stores all information related to a course.
+        ///
+        /// This should only be generated when parsed from a json file.
         #[derive(Deserialize)]
         #[allow(dead_code)] // TODO: use all of the fields
         pub struct Course {
@@ -441,7 +441,7 @@ mod schedule {
     use super::catalog::course::CourseID;
     use super::catalog::Catalog;
 
-    /// This structure is used to identify a semester in the schedule.
+    /// Used to identify a semester in the schedule.
     #[derive(PartialEq, Eq, Hash, Clone, Debug)]
     pub enum SemTime {
         Fall(i32),
@@ -624,7 +624,7 @@ mod schedule {
         }
     }
 
-    /// This structure stores one variant of a set of semesters.
+    /// Stores one variant of a set of semesters.
     #[derive(Clone, Debug)]
     pub struct Schedule {
         semesters: BTreeMap<SemTime, Semester>,
