@@ -1,22 +1,50 @@
-image: "rust:latest"
+stages:
+    - build
+    - test
 
-before_script:
-    - cargo install --force cargo-audit
-    - rustup component add rustfmt
+##############################
+#####       BUILD        #####
+##############################
+build-rust-latest:
+    stage: build
+    image: rust:latest
+    script:
+        - cargo build --verbose
+
+build-rust-nightly:
+    stage: build
+    image: rustlang/rust:nightly
+    script:
+        - cargo build --verbose
+    allow_failure: true
+
+##############################
+#####        TEST        #####
+##############################
+test-rust-latest:
+    stage: test
+    image: rust:latest
+    script:
+        - cargo test --verbose
+
+test-rust-nightly:
+    stage: test
+    image: rustlang/rust:nightly
+    script:
+        - cargo test --verbose
+    allow_failure: true
 
 audit:
+    stage: test
+    image: rust:latest
     script:
+        - cargo install --force cargo-audit
         - cargo build
         - cargo audit
 
 style:
+    stage: test
+    image: rust:latest
     script:
+        - rustup component add rustfmt
         - cargo fmt --all -- --check
-
-compilation:
-    script:
-        - cargo build
-
-tests:
-    script:
-        - cargo test
