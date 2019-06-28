@@ -2,7 +2,7 @@ pub use catalog::course::*;
 pub use catalog::*;
 pub use schedule::*;
 
-mod catalog {
+pub mod catalog {
     use std::collections::HashMap;
 
     use course::*;
@@ -433,7 +433,7 @@ mod catalog {
     }
 }
 
-mod schedule {
+pub mod schedule {
     use std::cmp::Ordering;
     use std::collections::{BTreeMap, HashSet};
     use std::fmt;
