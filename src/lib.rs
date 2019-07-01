@@ -799,7 +799,7 @@ pub mod schedule {
 
         fn try_add(&self, coid: &CourseID, sem: &SemTime, catalog: &Catalog) -> Option<Self> {
             if self.contains(coid) {
-                return None;
+                return Some(self.clone());
             }
 
             let course = catalog.get_course(coid).unwrap();
@@ -827,9 +827,9 @@ pub mod schedule {
                 }
             }
 
-            let mut new_sem = self.clone();
-            new_sem.add_course(sem, coid);
-            Some(new_sem)
+            let mut new_sched = self.clone();
+            new_sched.add_course(sem, coid);
+            Some(new_sched)
         }
 
         /// Generates all possible schedules which can be created by adding the
@@ -853,9 +853,13 @@ pub mod schedule {
                 let mut curr_set = Vec::new();
                 for prereq in prereq_set {
                     for schedule in &working_vec {
-                        let mut prereq_options =
-                            Self::add_course_to_schedule(prereq, &schedule, catalog);
-                        curr_set.append(&mut prereq_options);
+                        if !schedule.contains(prereq) {
+                            let mut prereq_options =
+                                Self::add_course_to_schedule(prereq, &schedule, catalog);
+                            curr_set.append(&mut prereq_options);
+                        } else {
+                            curr_set.push(schedule.clone());
+                        }
                     }
                 }
                 working_vec = curr_set;
