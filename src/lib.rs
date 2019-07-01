@@ -31,8 +31,7 @@ pub mod catalog {
         /// # Examples
         ///
         /// ```
-        /// # use myca::catalog::Catalog;
-        /// # use myca::catalog::course::{Course, CourseID};
+        /// # use myca::{Catalog, Course, CourseID};
         /// # use serde_json::json;
         /// # use serde::Deserialize;
         /// #
@@ -87,8 +86,7 @@ pub mod catalog {
         /// # Examples
         ///
         /// ```
-        /// # use myca::catalog::Catalog;
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::{Catalog, CourseID};
         /// #
         /// let mut catalog = Catalog::new();
         /// let coid = CourseID::new("TEST", 1100);
@@ -107,8 +105,7 @@ pub mod catalog {
         /// # Examples
         ///
         /// ```
-        /// # use myca::catalog::Catalog;
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::{Catalog, CourseID};
         /// #
         /// let mut catalog = Catalog::new();
         /// let coid = CourseID::new("TEST", 1100);
@@ -129,8 +126,7 @@ pub mod catalog {
         /// # Examples
         ///
         /// ```
-        /// # use myca::catalog::Catalog;
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::{Catalog, CourseID};
         /// #
         /// let mut catalog = Catalog::new();
         /// let coid = CourseID::new("TEST", 1200);
@@ -179,7 +175,7 @@ pub mod catalog {
             /// # Examples
             ///
             /// ```
-            /// # use myca::catalog::course::CourseID;
+            /// # use myca::CourseID;
             /// #
             /// let coid = CourseID::from("TEST 1100").unwrap();
             /// assert_eq!(coid, CourseID::new("TEST", 1100));
@@ -215,7 +211,7 @@ pub mod catalog {
         /// # Examples
         ///
         /// ```
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::CourseID;
         /// #
         /// let coid = CourseID::new("TEST", 1100);
         /// let coid_str = format!("{}", coid);
@@ -275,7 +271,7 @@ pub mod catalog {
             /// # Examples
             ///
             /// ```
-            /// # use myca::catalog::course::{Course, CourseID};
+            /// # use myca::{Course, CourseID};
             /// # use serde_json::json;
             /// # use serde::Deserialize;
             /// #
@@ -307,7 +303,7 @@ pub mod catalog {
             /// # Examples
             ///
             /// ```
-            /// # use myca::catalog::course::{Course, CourseID};
+            /// # use myca::{Course, CourseID};
             /// # use std::collections::HashSet;
             /// # use serde_json::json;
             /// # use serde::Deserialize;
@@ -359,7 +355,7 @@ pub mod catalog {
             /// # Examples
             ///
             /// ```
-            /// # use myca::catalog::course::{Course, CourseID};
+            /// # use myca::{Course, CourseID};
             /// # use std::collections::HashSet;
             /// # use serde_json::json;
             /// # use serde::Deserialize;
@@ -399,7 +395,7 @@ pub mod catalog {
         /// # Examples
         ///
         /// ```
-        /// # use myca::catalog::course::{Course, CourseID};
+        /// # use myca::{Course, CourseID};
         /// # use serde_json::json;
         /// # use serde::Deserialize;
         /// #
@@ -499,7 +495,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::{Semester, SemTime};
+        /// # use myca::{Semester, SemTime};
         /// #
         /// let semester = Semester::new(SemTime::Fall(2019));
         /// ```
@@ -515,8 +511,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::{Semester, SemTime};
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::{CourseID, Semester, SemTime};
         /// #
         /// let mut semester = Semester::new(SemTime::Fall(2019));
         /// let coid = CourseID::new("TEST", 1100);
@@ -534,8 +529,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::{Semester, SemTime};
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::{CourseID, Semester, SemTime};
         /// #
         /// let mut semester = Semester::new(SemTime::Fall(2019));
         /// let coid = CourseID::new("TEST", 1100);
@@ -557,8 +551,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::{Semester, SemTime};
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::{CourseID, Semester, SemTime};
         /// #
         /// let mut semester = Semester::new(SemTime::Fall(2019));
         /// let coid = CourseID::new("TEST", 1100);
@@ -576,7 +569,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::{Semester, SemTime};
+        /// # use myca::{Semester, SemTime};
         /// #
         /// let time = SemTime::Fall(2019);
         /// let semester = Semester::new(time.clone());
@@ -593,8 +586,7 @@ pub mod schedule {
     /// # Examples
     ///
     /// ```
-    /// # use myca::schedule::{Semester, SemTime};
-    /// # use myca::catalog::course::CourseID;
+    /// # use myca::{CourseID, Semester, SemTime};
     /// #
     /// let mut semester = Semester::new(SemTime::Fall(2019));
     /// semester.add_course(&CourseID::new("TEST", 1100));
@@ -636,7 +628,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::Schedule;
+        /// # use myca::Schedule;
         /// #
         /// let schedule = Schedule::new();
         /// ```
@@ -651,7 +643,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::*;
+        /// # use myca::{Schedule, Semester, SemTime};
         /// #
         /// let mut schedule = Schedule::new();
         /// let semester = Semester::new(SemTime::Fall(2019));
@@ -667,8 +659,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::*;
-        /// # use myca::catalog::course::CourseID;
+        /// # use myca::{CourseID, Schedule, Semester, SemTime};
         /// #
         /// let mut schedule = Schedule::new();
         /// let semester = Semester::new(SemTime::Fall(2019));
@@ -693,7 +684,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::*;
+        /// # use myca::{Schedule, Semester, SemTime};
         /// #
         /// let mut schedule = Schedule::new();
         /// let semester = Semester::new(SemTime::Fall(2019));
@@ -712,7 +703,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::*;
+        /// # use myca::{Schedule, Semester, SemTime};
         /// #
         /// let mut schedule = Schedule::new();
         /// let semester = Semester::new(SemTime::Fall(2019));
@@ -730,7 +721,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::*;
+        /// # use myca::{Schedule, Semester, SemTime};
         /// #
         /// let mut schedule = Schedule::new();
         /// let semester = Semester::new(SemTime::Fall(2019));
@@ -752,7 +743,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::schedule::*;
+        /// # use myca::{Schedule, Semester, SemTime};
         /// #
         /// let mut schedule = Schedule::new();
         /// let sem1 = Semester::new(SemTime::Fall(2019));
@@ -772,8 +763,7 @@ pub mod schedule {
         /// # Examples
         ///
         /// ```
-        /// # use myca::catalog::course::CourseID;
-        /// # use myca::schedule::*;
+        /// # use myca::{CourseID, Schedule, Semester, SemTime};
         /// #
         /// let coid = CourseID::new("TEST", 1100);
         /// let coid2 = CourseID::new("TEST", 1200);
