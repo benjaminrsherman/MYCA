@@ -778,13 +778,37 @@ pub mod schedule {
         /// assert!(!schedule.contains(&coid2));
         /// ```
         pub fn contains(&self, coid: &CourseID) -> bool {
-            for (_, semester) in &self.semesters {
+            self.get_time(coid).is_some()
+        }
+
+        /// Returns the first semester the given course can be found in within
+        /// the schedule, if such a course exists.
+        ///
+        /// # Examples
+        ///
+        /// ```rust
+        /// # use myca::{CourseID, Schedule, Semester, SemTime};
+        /// #
+        /// let coid = CourseID::new("TEST", 1100);
+        /// let coid2 = CourseID::new("TEST", 1200);
+        ///
+        /// let mut semester = Semester::new(SemTime::Fall(2019));
+        /// semester.add_course(&coid);
+        ///
+        /// let mut schedule = Schedule::new();
+        /// schedule.add_semester(semester);
+        ///
+        /// assert_eq!(schedule.get_time(&coid), Some(&SemTime::Fall(2019)));
+        /// assert!(schedule.get_time(&coid2).is_none());
+        /// ```
+        pub fn get_time(&self, coid: &CourseID) -> Option<&SemTime> {
+            for (time, semester) in &self.semesters {
                 if semester.contains(coid) {
-                    return true;
+                    return Some(time);
                 }
             }
 
-            false
+            None
         }
 
         fn try_add(&self, coid: &CourseID, sem: &SemTime, catalog: &Catalog) -> Option<Self> {
@@ -793,6 +817,28 @@ pub mod schedule {
             }
 
             let course = catalog.get_course(coid).unwrap();
+
+            for coreq_set in course.coreq_sets() {
+                let mut contains_at_least_one = false;
+                let mut valid_time = false;
+                for coreq in coreq_set {
+                    match self.get_time(coreq) {
+                        Some(time) => {
+                            contains_at_least_one = true;
+                            if time == sem {
+                                valid_time = true;
+                                break;
+                            }
+                        }
+                        None => continue,
+                    };
+                }
+
+                if contains_at_least_one != valid_time {
+                    return None;
+                }
+            }
+
             for prereq_set in course.prereq_sets() {
                 let mut valid = false;
 
@@ -802,12 +848,13 @@ pub mod schedule {
                     }
 
                     for (time, semester) in &self.semesters {
-                        if valid || time >= sem {
+                        if time >= sem {
                             break;
                         }
 
                         if semester.contains(prereq) {
                             valid = true;
+                            break;
                         }
                     }
                 }
@@ -825,7 +872,8 @@ pub mod schedule {
         /// Generates all possible schedules which can be created by adding the
         /// given course into the schedule.
         ///
-        /// Recursively adds prerequisites based on the catalog entry as well.
+        /// Recursively adds prerequisites and corequisites based on the catalog
+        /// entry.
         pub fn add_course_to_schedule(
             coid: &CourseID,
             sched: &Schedule,
@@ -837,12 +885,12 @@ pub mod schedule {
             };
 
             // Place prerequisites into schedule first
-            let mut working_vec = vec![sched.clone()];
+            let mut prereq_scheds = vec![sched.clone()];
             for prereq_set in course.prereq_sets() {
                 // curr_set will hold the set of all schedules from one of these prerequisites
                 let mut curr_set = Vec::new();
                 for prereq in prereq_set {
-                    for schedule in &working_vec {
+                    for schedule in &prereq_scheds {
                         if !schedule.contains(prereq) {
                             let mut prereq_options =
                                 Self::add_course_to_schedule(prereq, &schedule, catalog);
@@ -852,21 +900,39 @@ pub mod schedule {
                         }
                     }
                 }
-                working_vec = curr_set;
+                prereq_scheds = curr_set;
             }
 
-            // TODO: Handle corequisites
-
-            let mut valid_schedules = Vec::new();
-            for sched in working_vec {
+            // Add this course to the schedule
+            let mut prereq_and_this_scheds = Vec::new();
+            for sched in prereq_scheds {
                 for (time, _) in sched.semesters() {
                     if let Some(new_sched) = sched.try_add(coid, time, catalog) {
-                        valid_schedules.push(new_sched);
+                        prereq_and_this_scheds.push(new_sched);
                     }
                 }
             }
 
-            valid_schedules
+            // Add all corequisite courses to the schedule
+            let mut all_scheds = prereq_and_this_scheds;
+            for coreq_set in course.coreq_sets() {
+                // curr_set will hold the set of all schedules from one of these corequisites
+                let mut curr_set = Vec::new();
+                for coreq in coreq_set {
+                    for schedule in &all_scheds {
+                        if !schedule.contains(coreq) {
+                            let mut coreq_options =
+                                Self::add_course_to_schedule(coreq, &schedule, catalog);
+                            curr_set.append(&mut coreq_options);
+                        } else {
+                            curr_set.push(schedule.clone());
+                        }
+                    }
+                }
+                all_scheds = curr_set;
+            }
+
+            all_scheds
         }
     }
 
